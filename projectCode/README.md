@@ -56,9 +56,10 @@ This is the source code for project 6.
 
 # Build project
 * from the root directory of the source code, run `cd projectCode` to go into the actual source directory (if you are already inside the `projectCode` directory, you can skip this step)
-* run `make` to build and run the stateful functions
+* run `make build` to build and run the stateful functions
 * open `Docker Desktop` and click `graph-analytics` to see messages being sent and received
 * If you prefer reading logs produced by each container in the terminal, run `make kafka-terminal` instead
+* Remember to do `docker-compose down` before each new build
 
 __Important Note__: The zookeeper and Kafka broker container are using arm64 architecture. If you don't have Docker desktop, you might not be able to run it 
 on your local machine, depending on the architecture of your machine. Try using the amd64 version of these containers.
@@ -86,17 +87,19 @@ The supported executable tasks are:
 ## Running Queries with HTTP Requests
 To send queries via curl command, this is the template to us:
 ```bash
-curl -X PUT -H "Content-Type: application/vnd.graph-analytics.types/execute" -d <execute JSON> localhost:8090/graph-analytics.fns/filter/1
+curl -X PUT -H "Content-Type: application/vnd.graph-analytics.types/execute" -d '<execute JSON>' localhost:8090/graph-analytics.fns/filter/1
 ```
 
 Examples:
 ```bash
-# this CURL command will fetch all incoming edges for source vertex 1 at timestamp 123001
-curl -X PUT -H "Content-Type: application/vnd.graph-analytics.types/execute" -d {"task": GET_IN_EDGES, "src": 1, "t": 123001} localhost:8090/graph-analytics.fns/filter/1
+# this CURL command will fetch all incoming edges for source vertex 1
+curl -X PUT -H "Content-Type: application/vnd.graph-analytics.types/execute" -d '{"task": "GET_IN_EDGES", "dst": 31, "t": 1254396003}' localhost:8090/graph-analytics.fns/filter/1
 
-# this CURL command will fetch all outgoing edges for source vertex 1 BETWEEN 123001 <= t <= 125001
-curl -X PUT -H "Content-Type: application/vnd.graph-analytics.types/execute" -d {"task": GET_TIME_WINDOW_EDGES), "src": 1, "t": 123001, "endTime": 125001} localhost:8090/graph-analytics.fns/filter/1
+# this CURL command will fetch all outgoing edges for source vertex 1 BETWEEN 1254390000 <= t <= 1255000000
+curl -X PUT -H "Content-Type: application/vnd.graph-analytics.types/execute" -d '{"task": "GET_TIME_WINDOW_EDGES", "src": 1, "t": 1254390000, "endTime": 1255000000}' localhost:8090/graph-analytics.fns/filter/1
 ```
+To see the query results, you have to read from the appropriate topics in Kafka egress, or you can simply check the logs in the graph-analytics container. For information on how to read from kafka egress, see 
+the following section.
 
 ## Running Queries through Apache Kafka Broker
 The Kafka is set up according to this [guide](https://developer.confluent.io/quickstart/kafka-docker/), which is set up through `docker-compose`; therefore, by running `docker-compose`, it will automatically set up the broker. After `docker-compose up -d`, topics have to be created since at the moment, automatic topics creation during start up is not set up yet. Run the follow commands to manually create topics:
@@ -152,6 +155,16 @@ kafka-console-consumer --bootstrap-server localhost:9092 \
                        --topic incoming-edges \
                        --from-beginning
 ```
+Each topic corresponds to a specific query type  
+The supported topics are:
+- `incoming-edges`
+- `outgoing-edges`
+- `out-k-hop-result`
+- `out-triangle-result`
+- `in-triangle-result`
+- `in-k-hop-result`
+- `recommendation`
+- `time-window`
 <br>
 
 **To list the topics in Kafka:** <br>
@@ -198,3 +211,11 @@ Then copy & paste the following queries line by line:
 After entering all the queries, type `ctrl d` to exit the kafka console producer interface.  
 You should now see the following logs in the graph-analytics container if everything went well:
 ![query logs](resources/query_logs.png)
+If you want to read the above query results from kafka egress, type the following in terminal:
+```
+docker exec --interactive --tty broker \
+kafka-console-consumer --bootstrap-server broker:29092 \
+                       --topic incoming-edges \
+                       --from-beginning
+```
+This reads the query results corresponding to incoming-edges query, you can change the topic names to read results for different queries.
