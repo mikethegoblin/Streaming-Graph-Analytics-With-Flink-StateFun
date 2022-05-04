@@ -73,7 +73,8 @@ public class OutEdgesQueryFn implements StatefulFunction {
   }
 
   /**
-   * This function triggers the process for Out-Triangles query
+   * This method performs the first pass of the triangle function.
+   * All the outgoing edges the root vertex (A) are forwarded to the next logical instance of OutEdgesQueryFn.performTrianglePass (Vertex B).
    *
    * @param context
    * @param trigger
@@ -109,8 +110,10 @@ public class OutEdgesQueryFn implements StatefulFunction {
   }
 
   /**
-   * This function performs intermediate steps for Out-Triangles query
-   *
+   * This method performs the second pass of the triangle function.
+   * The outgoing edges of the root vertex are compared with the outgoing edges of the current vertex.
+   * If the outgoing edges of the previous (B) vertex are a subset of the outgoing edges of the current vertex (C),
+   * then A -> B -> C | A -> C is a triangle.
    * @param context
    * @param pass
    */
@@ -141,7 +144,9 @@ public class OutEdgesQueryFn implements StatefulFunction {
   }
 
   /**
-   * This function performs necessary steps for the Out-K-Hop query
+   * This method performs the k-hop query.
+   * The function performs the query by sending a message to the next logical instance of OutEdgesQueryFn.performKHop.
+   *
    * @param context
    * @param kHopQuery
    */

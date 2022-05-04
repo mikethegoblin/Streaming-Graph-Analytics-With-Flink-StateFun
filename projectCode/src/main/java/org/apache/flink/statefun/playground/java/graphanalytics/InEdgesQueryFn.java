@@ -72,7 +72,9 @@ public class InEdgesQueryFn implements StatefulFunction {
   }
 
   /**
-   * This function triggers the process for In-Triangles query
+   * This method performs the first pass of the triangle function.
+   * All the incoming edges the root vertex (A) are forwarded to the next logical instance of InEdgesQueryFn.performTrianglePass (Vertex B).
+   *
    * @param context
    * @param trigger
    */
@@ -107,7 +109,10 @@ public class InEdgesQueryFn implements StatefulFunction {
   }
 
   /**
-   * This function performs intermediate steps for In-Triangles query
+   * This method performs the second pass of the triangle function.
+   * The incoming edges of the root vertex are compared with the incoming edges of the current vertex.
+   * If the incoming edges of the previous (B) vertex are a subset of the incoming edges of the current vertex (C),
+   * then A -> B -> C | A -> C is a triangle.
    * @param context
    * @param pass
    */
@@ -138,7 +143,9 @@ public class InEdgesQueryFn implements StatefulFunction {
   }
 
   /**
-   * This function performs the necessary steps for the In-K-Hop query
+   * This method performs the k-hop query.
+   * The function performs the query by sending a message to the next logical instance of InEdgesQueryFn.performKHop.
+   *
    * @param context
    * @param kHopQuery
    */
