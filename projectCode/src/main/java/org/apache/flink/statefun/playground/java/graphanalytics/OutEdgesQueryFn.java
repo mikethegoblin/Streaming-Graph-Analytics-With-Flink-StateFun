@@ -305,6 +305,7 @@ public class OutEdgesQueryFn implements StatefulFunction {
     List<CustomTuple2<Integer, Long>> currentOutNeighbors =
         context.storage().get(OUT_NEIGHBORS).orElse(Collections.emptyList());
 
+    System.out.printf(String.format("the outgoing edges of vertex %d are %s\n", vertexId, currentOutNeighbors));
     context.send(
         KafkaEgressMessage.forEgress(EGRESS_TYPE)
             .withTopic("outgoing-edges")

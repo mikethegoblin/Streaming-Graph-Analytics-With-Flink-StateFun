@@ -90,6 +90,7 @@ public class RecommendationFn implements StatefulFunction {
    */
   private void outputResult(Context context, int vertexId) {
     Set<Integer> recommendSet = getRecommendationSet(context);
+    System.out.printf(String.format("recommend %s to vertex %d\n", recommendSet, vertexId));
     context.send(
         KafkaEgressMessage.forEgress(EGRESS_TYPE)
             .withTopic("recommendation")
