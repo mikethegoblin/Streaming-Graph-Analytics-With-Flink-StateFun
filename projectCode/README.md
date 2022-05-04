@@ -4,9 +4,9 @@ This is the source code for project 6.
 # Readme index
 [Project Structure](#project-structure-and-file-explanations)  
 [Query API](#query-api)  
-[Build Project](#build-project)
-[Running Queries Using HTTP](#running-queries-with-http-requests)
-[Running Queries with Kafka](#running-queries-through-apache-kafka-broker)
+[Build Project](#build-project)  
+[Running Queries Using HTTP](#running-queries-with-http-requests)  
+[Running Queries with Kafka](#running-queries-through-apache-kafka-broker)  
 [Test Application](#test)
 
 # Project Structure and file explanations:
