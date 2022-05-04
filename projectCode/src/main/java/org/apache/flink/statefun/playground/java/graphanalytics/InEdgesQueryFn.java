@@ -265,6 +265,7 @@ public class InEdgesQueryFn implements StatefulFunction {
   private void outputResult(Context context, int vertexId) {
     List<CustomTuple2<Integer, Long>> currentInNeighbors =
         context.storage().get(IN_NEIGHBORS).orElse(Collections.emptyList());
+    System.out.printf(String.format("the incoming edges of vertex %d are %s\n", vertexId, currentInNeighbors));
     context.send(
         KafkaEgressMessage.forEgress(EGRESS_TYPE)
             .withTopic("incoming-edges")

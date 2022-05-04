@@ -1,6 +1,14 @@
 # Project 6: Temporal Graph Queries and Analysis
 This is the source code for project 6.
 
+# Readme index
+[Project Structure](#project-structure-and-file-explanations)  
+[Query API](#query-api)  
+[Build Project](#build-project)
+[Running Queries Using HTTP](#running-queries-with-http-requests)
+[Running Queries with Kafka](#running-queries-through-apache-kafka-broker)
+[Test Application](#test)
+
 # Project Structure and file explanations:
 * `src/` contains all the source code, and `src/.../types` contains the types we need (eg. `CustomTuple2` and `Vertex` classes) for the different queries
 * `src/.../KafkaProducerApp.java` contains code to read from a data file and injects messages to Kafka ingress. This program is run within the `producer` container
@@ -134,14 +142,14 @@ To read messages from a "quickstart" topic:
 ```
 docker exec --interactive --tty broker \
 kafka-console-consumer --bootstrap-server broker:29092 \
-                       --topic tasks \
+                       --topic incoming-edges \
                        --from-beginning
 ```
 
 If you have kafka installed on your device, then you can enter this instead:
 ```
 kafka-console-consumer --bootstrap-server localhost:9092 \
-                       --topic tasks \
+                       --topic incoming-edges \
                        --from-beginning
 ```
 <br>
@@ -162,3 +170,31 @@ kafka-topics --bootstrap-server localhost:9092 \
 ```
 docker run -it --rm --network=projectcode_default edenhill/kcat:1.7.1 -b broker:29092 -L
 ```
+
+# Test
+To test our application runs correctly, please follow the steps listed below:  
+1. First, `cd` into the projectCode folder. Run `make build` to build and start up all the docker containers.
+2. Verify the containers are up in Docker Desktop. The producer container will be down shortly because it only sends some data to the stateful functions.
+It might take a while for all the containers to initialize themselves, but you should see something similar to the following logs in 
+the graph-analytics container if everything has started correctly:
+![initial log](resources/initial_logs.png)
+3. Now, you can run some queries to test the functions. In the terminal, type the following to start a kafka console producer through the broker container:
+```
+docker exec --interactive --tty broker \
+kafka-console-producer --bootstrap-server broker:29092 \
+                       --topic tasks \
+                       --property parse.key=true \
+                       --property key.separator="|"
+```
+Then copy & paste the following queries line by line:
+```
+31|{"task": "GET_IN_EDGES", "dst": 31, "t": 1254396003}
+1|{"task": "GET_OUT_EDGES", "src": 1, "t": 1254395032}
+1|{"task": "GET_TIME_WINDOW_EDGES", "src": 1, "t": 1254390000, "endTime": 1255000000}
+31|{"task": "OUT_K_HOP", "src": 31, "k": 2}
+1|{"task": "OUT_TRIANGLES", "src": 1}
+1|{"task": "GET_RECOMMENDATION", "dst": 1, "t": 1254395032}
+```
+After entering all the queries, type `ctrl d` to exit the kafka console producer interface.  
+You should now see the following logs in the graph-analytics container if everything went well:
+![query logs](resources/query_logs.png)
